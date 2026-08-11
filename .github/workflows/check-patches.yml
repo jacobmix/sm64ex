@@ -1,0 +1,58 @@
+name: Check enhancement patches
+
+on:
+release:
+types: [published]
+
+workflow_dispatch:
+
+jobs:
+check-patches:
+name: Check enhancement patches
+runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout release
+    uses: actions/checkout@v6
+    with:
+      ref: ${{ github.event.release.tag_name || github.ref }}
+      fetch-depth: 0
+
+  - name: Check enhancement patches
+    shell: bash
+    run: |
+      set -uo pipefail
+
+      failed=0
+
+      echo "Checking enhancement patches..."
+      echo
+
+      patches=$(find enhancements -type f -name '*.patch' | sort)
+
+      if [ -z "$patches" ]; then
+        echo "No patch files found."
+        exit 0
+      fi
+
+      while IFS= read -r patch_file; do
+        echo "========================================"
+        echo "Checking: $patch_file"
+        echo "========================================"
+
+        if patch --dry-run --forward -p1 < "$patch_file"; then
+          echo "PASS: $patch_file"
+        else
+          echo "FAIL: $patch_file"
+          failed=1
+        fi
+
+        echo
+      done <<< "$patches"
+
+      if [ "$failed" -ne 0 ]; then
+        echo "One or more enhancement patches no longer apply cleanly."
+        exit 1
+      fi
+
+      echo "All enhancement patches apply cleanly."
