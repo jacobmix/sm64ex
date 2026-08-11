@@ -3,6 +3,9 @@ name: Check enhancement patches
 on:
   release:
     types: [published]
+  push:
+    branches:
+      - "archipelago"
   workflow_dispatch:
 
 jobs:
