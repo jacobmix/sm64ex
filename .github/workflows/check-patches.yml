@@ -1,8 +1,7 @@
 name: Check enhancement patches
 
+# On pushes to branch "archipelago". Change to just push or other branches if desired. Can also be manually triggered.
 on:
-  release:
-    types: [published]
   push:
     branches:
       - "archipelago"
